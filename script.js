@@ -9,6 +9,7 @@ const startBtn = document.getElementById('start-btn');
 const restartBtn = document.getElementById('restart-btn');
 const saveBtn = document.getElementById('save-btn');
 const playerNameInput = document.getElementById('player-name');
+const leaderboardList = document.getElementById('leaderboard-list');
 
 // Firebase Configuration (received from user)
 const firebaseConfig = {
@@ -53,6 +54,39 @@ saveBtn.addEventListener('click', saveScore);
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Fetch leaderboard on load
+fetchLeaderboard();
+
+function fetchLeaderboard() {
+    db.collection("highscores")
+        .orderBy("score", "desc")
+        .limit(10)
+        .get()
+        .then((querySnapshot) => {
+            leaderboardList.innerHTML = "";
+            let rank = 1;
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const entry = document.createElement('div');
+                entry.className = 'leaderboard-entry';
+                entry.innerHTML = `
+                    <span class="rank">#${rank++}</span>
+                    <span class="player-name">${data.name || 'Anonymous'}</span>
+                    <span class="player-score">${data.score}</span>
+                `;
+                leaderboardList.appendChild(entry);
+            });
+
+            if (querySnapshot.empty) {
+                leaderboardList.innerHTML = '<div class="loading">No scores yet. Be the first!</div>';
+            }
+        })
+        .catch((error) => {
+            console.error("Error getting leaderboard: ", error);
+            leaderboardList.innerHTML = '<div class="loading">Error loading scores.</div>';
+        });
+}
+
 function saveScore() {
     const name = playerNameInput.value.trim();
     if (!name) {
@@ -72,6 +106,7 @@ function saveScore() {
             saveBtn.textContent = "SAVED!";
             saveBtn.style.color = "#00ff88";
             saveBtn.style.borderColor = "#00ff88";
+            fetchLeaderboard(); // Refresh leaderboard
         })
         .catch((error) => {
             console.error("Error adding document: ", error);

@@ -14,35 +14,58 @@
 </head>
 
 <body>
-    <div class="game-container">
-        <header>
-            <h1>NEON SNAKE</h1>
-            <div class="score-board">
-                <div class="score-item">SCORE: <span id="score">0</span></div>
-                <div class="score-item">HIGH SCORE: <span id="high-score">0</span></div>
-            </div>
-        </header>
-
-        <div class="game-area">
-            <canvas id="gameCanvas" width="400" height="400"></canvas>
-            <div id="start-screen" class="overlay">
-                <h2>PRESS START</h2>
-                <button id="start-btn">START GAME</button>
-            </div>
-            <div id="game-over-screen" class="overlay hidden">
-                <h2>GAME OVER</h2>
-                <p>FINAL SCORE: <span id="final-score">0</span></p>
-                <div class="save-score-container">
-                    <input type="text" id="player-name" placeholder="Enter Name" maxlength="15">
-                    <button id="save-btn">SAVE SCORE</button>
+    <div class="main-wrapper">
+        <!-- Left Panel: Current Session Stats -->
+        <aside class="side-panel stats-panel">
+            <div class="panel-header">LIVE STATS</div>
+            <div class="stat-group">
+                <div class="stat-card">
+                    <span class="stat-label">SCORE</span>
+                    <span id="score" class="stat-value">0</span>
                 </div>
-                <button id="restart-btn">TRY AGAIN</button>
+                <div class="stat-card highlighted">
+                    <span class="stat-label">BEST</span>
+                    <span id="high-score" class="stat-value">0</span>
+                </div>
             </div>
-        </div>
 
-        <div class="controls-hint">
-            <p>Use Arrow Keys to Move</p>
-        </div>
+            <div class="controls-hint">
+                <p>Use [←][↑][→][↓] TO MOVE</p>
+            </div>
+        </aside>
+
+        <!-- Center: The Game -->
+        <main class="game-container">
+            <header>
+                <h1>NEON SNAKE</h1>
+            </header>
+
+            <div class="game-area">
+                <canvas id="gameCanvas" width="400" height="400"></canvas>
+                <div id="start-screen" class="overlay">
+                    <h2>READY?</h2>
+                    <button id="start-btn">ENGAGE</button>
+                </div>
+                <div id="game-over-screen" class="overlay hidden">
+                    <h2 class="glitch">GAME OVER</h2>
+                    <p>FINAL SCORE: <span id="final-score">0</span></p>
+                    <div class="save-score-container">
+                        <input type="text" id="player-name" placeholder="INIT_NAME" maxlength="15">
+                        <button id="save-btn">UPLOAD SCORE</button>
+                    </div>
+                    <button id="restart-btn" class="secondary">RETRY</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Panel: Global Leaderboard -->
+        <aside class="side-panel leaderboard-panel">
+            <div class="panel-header">HALL OF FAME</div>
+            <div id="leaderboard-list">
+                <!-- Leaderboard items will be injected here -->
+                <div class="loading">SYNCING DATA...</div>
+            </div>
+        </aside>
     </div>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
