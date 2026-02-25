@@ -7,6 +7,21 @@ const startScreen = document.getElementById('start-screen');
 const gameOverScreen = document.getElementById('game-over-screen');
 const startBtn = document.getElementById('start-btn');
 const restartBtn = document.getElementById('restart-btn');
+const saveBtn = document.getElementById('save-btn');
+const playerNameInput = document.getElementById('player-name');
+
+// Firebase Configuration (received from user)
+const firebaseConfig = {
+    apiKey: "AIzaSyDPvz2uLxnmNxfCc9XMyoS3T1g45d8RUB4",
+    authDomain: "snake-neon-1dddd.firebaseapp.com",
+    projectId: "snake-neon-1dddd",
+    storageBucket: "snake-neon-1dddd.firebasestorage.app",
+    messagingSenderId: "819206866602",
+    appId: "1:819206866602:web:8e4cb77aee5cd0464132d3",
+    measurementId: "G-J5K26L249H"
+};
+
+// Initialize Firebase (SDK added to index.html)
 
 // Game Constants
 const GRID_SIZE = 20;
@@ -32,6 +47,41 @@ highScoreElement.textContent = highScore;
 document.addEventListener('keydown', handleInput);
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', restartGame);
+saveBtn.addEventListener('click', saveScore);
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+function saveScore() {
+    const name = playerNameInput.value.trim();
+    if (!name) {
+        alert("Please enter a name!");
+        return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = "SAVING...";
+
+    db.collection("highscores").add({
+        name: name,
+        score: score,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
+        .then(() => {
+            saveBtn.textContent = "SAVED!";
+            saveBtn.style.color = "#00ff88";
+            saveBtn.style.borderColor = "#00ff88";
+        })
+        .catch((error) => {
+            console.error("Error adding document: ", error);
+            saveBtn.disabled = false;
+            saveBtn.textContent = "RETRY";
+            saveBtn.style.color = "var(--secondary-color)";
+            saveBtn.style.borderColor = "var(--secondary-color)";
+            alert("Error saving score. Please check the console.");
+        });
+}
 
 function startGame() {
     startScreen.classList.add('hidden');
@@ -270,5 +320,10 @@ function spawnFood() {
 function gameOver() {
     isGameRunning = false;
     finalScoreElement.textContent = score;
+    playerNameInput.value = ""; // Clear name input
+    saveBtn.disabled = false;
+    saveBtn.textContent = "SAVE SCORE";
+    saveBtn.style.color = "var(--primary-color)";
+    saveBtn.style.borderColor = "var(--primary-color)";
     gameOverScreen.classList.remove('hidden');
 }

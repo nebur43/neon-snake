@@ -3,7 +3,7 @@
 - [x] Create implementation plan <!-- id: 0 -->
 - [x] Implement core Snake mechanics (exponential food, dynamic speed) <!-- id: 1 -->
 - [x] Implement Special "Blue Food" mechanic <!-- id: 2 -->
-- [ ] Integrate Firebase for high score persistence <!-- id: 3 -->
+- [x] Integrate Firebase for high score persistence <!-- id: 3 -->
 
 
 ## Goal Description
