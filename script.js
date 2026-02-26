@@ -76,6 +76,12 @@ auth.onAuthStateChanged(user => {
         authContainer.classList.remove('hidden');
         startBtn.classList.add('hidden');
         userInfoPanel.classList.add('hidden');
+
+        // Reset game state on logout
+        isGameRunning = false;
+        gameOverScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+        dx = 0; dy = 0; // Stop any current movement
     }
 });
 
@@ -143,6 +149,8 @@ function saveScore() {
 }
 
 function startGame() {
+    if (!currentUser) return; // Protect game start
+
     startScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
     resetGame();
