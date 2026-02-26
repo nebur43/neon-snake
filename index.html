@@ -17,6 +17,15 @@
     <div class="main-wrapper">
         <!-- Left Panel: Current Session Stats -->
         <aside class="side-panel stats-panel">
+            <div id="user-info" class="user-profile hidden">
+                <div class="user-top">
+                    <img id="user-avatar" src="" alt="Avatar">
+                    <div class="user-details">
+                        <span id="display-name">Guest</span>
+                    </div>
+                </div>
+                <button id="logout-btn">LOGOUT</button>
+            </div>
             <div class="panel-header">LIVE STATS</div>
             <div class="stat-group">
                 <div class="stat-card">
@@ -44,15 +53,19 @@
                 <canvas id="gameCanvas" width="400" height="400"></canvas>
                 <div id="start-screen" class="overlay">
                     <h2>READY?</h2>
-                    <button id="start-btn">ENGAGE</button>
+                    <div id="auth-container" class="auth-box">
+                        <p>SIGN IN TO COMPETE</p>
+                        <button id="google-login" class="login-btn google">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                            Sign in with Google
+                        </button>
+                    </div>
+                    <button id="start-btn" class="hidden">ENGAGE</button>
                 </div>
                 <div id="game-over-screen" class="overlay hidden">
                     <h2 class="glitch">GAME OVER</h2>
                     <p>FINAL SCORE: <span id="final-score">0</span></p>
-                    <div class="save-score-container">
-                        <input type="text" id="player-name" placeholder="INIT_NAME" maxlength="15">
-                        <button id="save-btn">UPLOAD SCORE</button>
-                    </div>
+                    <p id="save-status" class="save-status"></p>
                     <button id="restart-btn" class="secondary">RETRY</button>
                 </div>
             </div>
@@ -68,6 +81,7 @@
         </aside>
     </div>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="script.js"></script>
 </body>

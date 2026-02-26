@@ -7,9 +7,15 @@ const startScreen = document.getElementById('start-screen');
 const gameOverScreen = document.getElementById('game-over-screen');
 const startBtn = document.getElementById('start-btn');
 const restartBtn = document.getElementById('restart-btn');
-const saveBtn = document.getElementById('save-btn');
-const playerNameInput = document.getElementById('player-name');
 const leaderboardList = document.getElementById('leaderboard-list');
+const authContainer = document.getElementById('auth-container');
+const userInfoPanel = document.getElementById('user-info');
+const userAvatar = document.getElementById('user-avatar');
+const displayNameElem = document.getElementById('display-name');
+const logoutBtn = document.getElementById('logout-btn');
+const googleLoginBtn = document.getElementById('google-login');
+
+let currentUser = null;
 
 // Firebase Configuration (received from user)
 const firebaseConfig = {
@@ -48,11 +54,35 @@ highScoreElement.textContent = highScore;
 document.addEventListener('keydown', handleInput);
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', restartGame);
-saveBtn.addEventListener('click', saveScore);
+logoutBtn.addEventListener('click', () => firebase.auth().signOut());
+googleLoginBtn.addEventListener('click', loginWithGoogle);
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
+
+// Auth State Listener
+auth.onAuthStateChanged(user => {
+    currentUser = user;
+    if (user) {
+        authContainer.classList.add('hidden');
+        startBtn.classList.remove('hidden');
+        userInfoPanel.classList.remove('hidden');
+
+        userAvatar.src = user.photoURL || 'https://www.gravatar.com/avatar/0000?d=mp';
+        displayNameElem.textContent = user.displayName || 'Player';
+    } else {
+        authContainer.classList.remove('hidden');
+        startBtn.classList.add('hidden');
+        userInfoPanel.classList.add('hidden');
+    }
+});
+
+function loginWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(error => console.error(error));
+}
 
 // Fetch leaderboard on load
 fetchLeaderboard();
@@ -88,33 +118,27 @@ function fetchLeaderboard() {
 }
 
 function saveScore() {
-    const name = playerNameInput.value.trim();
-    if (!name) {
-        alert("Please enter a name!");
-        return;
-    }
+    if (!currentUser) return; // Silent return if not logged in
 
-    saveBtn.disabled = true;
-    saveBtn.textContent = "SAVING...";
+    const saveStatus = document.getElementById('save-status');
+    saveStatus.textContent = "SAVING SCORE...";
+    saveStatus.style.color = "#888";
 
     db.collection("highscores").add({
-        name: name,
+        name: currentUser.displayName || "Anonymous",
+        uid: currentUser.uid,
         score: score,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     })
         .then(() => {
-            saveBtn.textContent = "SAVED!";
-            saveBtn.style.color = "#00ff88";
-            saveBtn.style.borderColor = "#00ff88";
+            saveStatus.textContent = "SCORE SAVED!";
+            saveStatus.style.color = "var(--primary-color)";
             fetchLeaderboard(); // Refresh leaderboard
         })
         .catch((error) => {
             console.error("Error adding document: ", error);
-            saveBtn.disabled = false;
-            saveBtn.textContent = "RETRY";
-            saveBtn.style.color = "var(--secondary-color)";
-            saveBtn.style.borderColor = "var(--secondary-color)";
-            alert("Error saving score. Please check the console.");
+            saveStatus.textContent = "ERROR SAVING SCORE";
+            saveStatus.style.color = "var(--secondary-color)";
         });
 }
 
@@ -355,10 +379,6 @@ function spawnFood() {
 function gameOver() {
     isGameRunning = false;
     finalScoreElement.textContent = score;
-    playerNameInput.value = ""; // Clear name input
-    saveBtn.disabled = false;
-    saveBtn.textContent = "SAVE SCORE";
-    saveBtn.style.color = "var(--primary-color)";
-    saveBtn.style.borderColor = "var(--primary-color)";
     gameOverScreen.classList.remove('hidden');
+    saveScore(); // Auto-save score on game over
 }

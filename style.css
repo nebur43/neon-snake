@@ -303,7 +303,120 @@ button.secondary:hover {
     text-shadow: 2px 2px #00ffff, -2px -2px #ff00ff !important;
 }
 
-/* Responsive */
+/* User Profile */
+.user-profile {
+    display: flex;
+    flex-direction: column;
+    /* Stack vertically */
+    gap: 15px;
+    padding: 20px;
+    background: rgba(0, 255, 136, 0.05);
+    border-bottom: 1px solid var(--grid-color);
+}
+
+.user-profile.hidden {
+    display: none;
+}
+
+.user-top {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+#user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--primary-color);
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+#display-name {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: white;
+}
+
+#logout-btn {
+    background: transparent;
+    border: 1px solid var(--secondary-color);
+    color: var(--secondary-color);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    width: 100%;
+    /* Full width in the column */
+    font-family: var(--font-heading);
+    letter-spacing: 2px;
+    box-shadow: 0 0 5px rgba(255, 0, 85, 0.2);
+}
+
+#logout-btn:hover {
+    background: var(--secondary-color);
+    color: white;
+    box-shadow: 0 0 10px var(--secondary-color);
+}
+
+/* Auth Box */
+.auth-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.auth-box.hidden {
+    display: none;
+}
+
+.auth-box p {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    color: #666;
+    letter-spacing: 2px;
+}
+
+.login-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 240px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #333;
+    pointer-events: auto;
+}
+
+.login-btn img {
+    width: 18px;
+    height: 18px;
+}
+
+.login-btn.google:hover {
+    background: #4285F4;
+    border-color: #4285F4;
+    color: white;
+}
+
+.save-status {
+    font-size: 0.8rem;
+    font-family: var(--font-heading);
+    margin: 15px 0;
+    letter-spacing: 1px;
+    height: 1.2rem;
+    /* Keep space even when empty */
+}
+
 @media (max-width: 1100px) {
     .main-wrapper {
         grid-template-columns: 1fr;
