@@ -15,6 +15,15 @@ const displayNameElem = document.getElementById('display-name');
 const logoutBtn = document.getElementById('logout-btn');
 const googleLoginBtn = document.getElementById('google-login');
 
+// Mobile elements
+const mobileScoreElem = document.getElementById('mobile-score');
+const mobileTrophyBtn = document.getElementById('mobile-trophy-btn');
+const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+const mobileModal = document.getElementById('mobile-leaderboard-modal');
+const mobileLeaderboardList = document.getElementById('mobile-leaderboard-list');
+const mobileModalClose = document.getElementById('mobile-modal-close');
+const mobileTop5 = document.getElementById('mobile-top5');
+
 let currentUser = null;
 
 // Firebase Configuration (received from user)
@@ -55,9 +64,44 @@ document.addEventListener('keydown', handleInput);
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', restartGame);
 logoutBtn.addEventListener('click', () => firebase.auth().signOut());
+mobileLogoutBtn.addEventListener('click', () => firebase.auth().signOut());
 googleLoginBtn.addEventListener('click', loginWithGoogle);
+mobileTrophyBtn.addEventListener('click', () => {
+    mobileModal.classList.remove('hidden');
+});
+mobileModalClose.addEventListener('click', () => {
+    mobileModal.classList.add('hidden');
+});
 
-// Initialize Firebase
+
+// Mobile Swipe Controls
+let touchStartX = 0;
+let touchStartY = 0;
+
+canvas.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+    e.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+    if (!isGameRunning) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    const minSwipe = 30; // Minimum px to count as a swipe
+
+    if (Math.abs(dx) < minSwipe && Math.abs(dy) < minSwipe) return; // Too short, ignore
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        // Horizontal swipe
+        changeDirection(dx > 0 ? 1 : -1, 0);
+    } else {
+        // Vertical swipe
+        changeDirection(0, dy > 0 ? 1 : -1);
+    }
+    e.preventDefault();
+}, { passive: false });
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -100,21 +144,46 @@ function fetchLeaderboard() {
         .get()
         .then((querySnapshot) => {
             leaderboardList.innerHTML = "";
+            mobileLeaderboardList.innerHTML = "";
             let rank = 1;
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                const entry = document.createElement('div');
-                entry.className = 'leaderboard-entry';
-                entry.innerHTML = `
-                    <span class="rank">#${rank++}</span>
-                    <span class="player-name">${data.name || 'Anonymous'}</span>
-                    <span class="player-score">${data.score}</span>
-                `;
-                leaderboardList.appendChild(entry);
-            });
+            const docs = [];
+            querySnapshot.forEach((doc) => docs.push(doc.data()));
 
-            if (querySnapshot.empty) {
+            // Desktop leaderboard
+            if (docs.length === 0) {
                 leaderboardList.innerHTML = '<div class="loading">No scores yet. Be the first!</div>';
+            } else {
+                docs.forEach(data => {
+                    const entry = document.createElement('div');
+                    entry.className = 'leaderboard-entry';
+                    entry.innerHTML = `
+                        <span class="rank">#${rank}</span>
+                        <span class="player-name">${data.name || 'Anonymous'}</span>
+                        <span class="player-score">${data.score}</span>
+                    `;
+                    leaderboardList.appendChild(entry);
+
+                    // Mobile full leaderboard modal (same style)
+                    const mEntry = entry.cloneNode(true);
+                    mobileLeaderboardList.appendChild(mEntry);
+
+                    rank++;
+                });
+            }
+
+            // Top 5 for game-over screen (mobile)
+            mobileTop5.innerHTML = '';
+            if (docs.length > 0) {
+                const titleEl = document.createElement('div');
+                titleEl.className = 'top5-title';
+                titleEl.textContent = '— TOP SCORES —';
+                mobileTop5.appendChild(titleEl);
+                docs.slice(0, 5).forEach((data, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'top5-entry';
+                    row.innerHTML = `<span>#${i + 1} ${data.name || 'Anonymous'}</span><span class="top5-score">${data.score}</span>`;
+                    mobileTop5.appendChild(row);
+                });
             }
         })
         .catch((error) => {
@@ -176,6 +245,7 @@ function resetGame() {
     dy = -1;
     score = 0;
     scoreElement.textContent = score;
+    mobileScoreElem.textContent = score;
     currentSpeed = GAME_SPEED; // Reset speed
     pendingGrowth = 0;
     changingDirection = false;
@@ -187,7 +257,6 @@ function resetGame() {
 
 function handleInput(e) {
     if (!isGameRunning) return;
-    console.log(e.key);
     if (changingDirection) return;
 
     // Prevent default scrolling for arrow keys
@@ -196,31 +265,23 @@ function handleInput(e) {
     }
 
     switch (e.key) {
-        case 'ArrowUp':
-            if (dy === 1) return; // Can't move down if moving up
-            dx = 0;
-            dy = -1;
-            changingDirection = true;
-            break;
-        case 'ArrowDown':
-            if (dy === -1) return;
-            dx = 0;
-            dy = 1;
-            changingDirection = true;
-            break;
-        case 'ArrowLeft':
-            if (dx === 1) return;
-            dx = -1;
-            dy = 0;
-            changingDirection = true;
-            break;
-        case 'ArrowRight':
-            if (dx === -1) return;
-            dx = 1;
-            dy = 0;
-            changingDirection = true;
-            break;
+        case 'ArrowUp': changeDirection(0, -1); break;
+        case 'ArrowDown': changeDirection(0, 1); break;
+        case 'ArrowLeft': changeDirection(-1, 0); break;
+        case 'ArrowRight': changeDirection(1, 0); break;
     }
+}
+
+function changeDirection(newDx, newDy) {
+    if (changingDirection) return;
+
+    // Check if trying to move opposite way
+    if (newDx === -dx && dx !== 0) return;
+    if (newDy === -dy && dy !== 0) return;
+
+    dx = newDx;
+    dy = newDy;
+    changingDirection = true;
 }
 
 // Rewriting loop to use setTimeout for controlled game speed
@@ -264,6 +325,7 @@ function update() {
             const points = eatenFood.type === 'blue' ? 50 : 10;
             score += points;
             scoreElement.textContent = score;
+            mobileScoreElem.textContent = score;
             if (score > highScore) {
                 highScore = score;
                 highScoreElement.textContent = highScore;

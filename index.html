@@ -66,10 +66,35 @@
                     <h2 class="glitch">GAME OVER</h2>
                     <p>FINAL SCORE: <span id="final-score">0</span></p>
                     <p id="save-status" class="save-status"></p>
+                    <div id="mobile-top5" class="mobile-top5"></div>
                     <button id="restart-btn" class="secondary">RETRY</button>
                 </div>
             </div>
+
         </main>
+
+        <!-- Mobile HUD: only visible on small screens -->
+        <div id="mobile-hud" class="mobile-hud">
+            <div class="mobile-hud-score">
+                <span class="mobile-hud-label">SCORE</span>
+                <span id="mobile-score">0</span>
+            </div>
+            <div class="mobile-hud-actions">
+                <button id="mobile-trophy-btn" title="Leaderboard">🏆</button>
+                <button id="mobile-logout-btn" title="Logout">⏏</button>
+            </div>
+        </div>
+
+        <!-- Mobile Leaderboard Modal -->
+        <div id="mobile-leaderboard-modal" class="mobile-modal hidden">
+            <div class="mobile-modal-content">
+                <div class="mobile-modal-header">
+                    <span>🏆 HALL OF FAME</span>
+                    <button id="mobile-modal-close">✕</button>
+                </div>
+                <div id="mobile-leaderboard-list" class="mobile-leaderboard-list"></div>
+            </div>
+        </div>
 
         <!-- Right Panel: Global Leaderboard -->
         <aside class="side-panel leaderboard-panel">
