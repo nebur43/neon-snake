@@ -105,6 +105,7 @@ canvas.addEventListener('touchend', (e) => {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
+const analytics = firebase.analytics(); // Initialize Analytics
 
 // Auth State Listener
 auth.onAuthStateChanged(user => {
@@ -116,6 +117,9 @@ auth.onAuthStateChanged(user => {
 
         userAvatar.src = user.photoURL || 'https://www.gravatar.com/avatar/0000?d=mp';
         displayNameElem.textContent = user.displayName || 'Player';
+
+        // Analytics: track login
+        analytics.logEvent('login', { method: 'Google' });
     } else {
         authContainer.classList.remove('hidden');
         startBtn.classList.add('hidden');
@@ -225,6 +229,12 @@ function startGame() {
     resetGame();
     isGameRunning = true;
     gameLoopStep();
+
+    // Analytics: track game start
+    analytics.logEvent('game_start', {
+        user_id: currentUser.uid,
+        player_name: currentUser.displayName || 'Anonymous'
+    });
 }
 
 function restartGame() {
@@ -450,5 +460,13 @@ function gameOver() {
     isGameRunning = false;
     finalScoreElement.textContent = score;
     gameOverScreen.classList.remove('hidden');
+
+    // Analytics: track game over
+    analytics.logEvent('game_over', {
+        score: score,
+        user_id: currentUser ? currentUser.uid : 'anonymous',
+        snake_length: snake.length
+    });
+
     saveScore(); // Auto-save score on game over
 }
