@@ -103,6 +103,10 @@ canvas.addEventListener('touchend', (e) => {
 }, { passive: false });
 
 firebase.initializeApp(firebaseConfig);
+firebase.appCheck().activate(
+    '6LdsDn0sAAAAAOB9JSXv5DSNkQkQpOAxlsxcqXKZ',  // Lo obtienes de Google reCAPTCHA v3
+    true // isTokenAutoRefreshEnabled
+);
 const db = firebase.firestore();
 const auth = firebase.auth();
 const analytics = firebase.analytics(); // Initialize Analytics
